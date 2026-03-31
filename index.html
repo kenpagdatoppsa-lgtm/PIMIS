@@ -60,7 +60,10 @@
             <input placeholder="Value" id="value" type="number" required>
             <input placeholder="Officer" id="officer" required>
             <input placeholder="Location" id="itemLocation" required>
-            <input placeholder="Condition" id="condition" required>
+            <select id="condition">
+                <option>Serviceable</option>
+                <option>Unserviceable</option>
+            </select>
             <button type="submit">Add Item</button>
         </form>
         <table id="inventoryTable">
@@ -191,10 +194,10 @@
     }
     function deleteItem(index){ inventory.splice(index,1); localStorage.setItem("inventory",JSON.stringify(inventory)); renderInventory(); }
 
-    function renderIssuance(){ let t=""; issuance.forEach(i=>{ t+=`<tr><td>${i.property}</td><td>${i.ics}</td><td>${i.par}</td><td>${i.to}</td></tr>`; }); document.querySelector("#issuanceTable tbody").innerHTML=t; }
-    function renderTransfers(){ let t=""; transfers.forEach(i=>{ t+=`<tr><td>${i.property}</td><td>${i.from}</td><td>${i.to}</td></tr>`; }); document.querySelector("#transferTable tbody").innerHTML=t; }
+    function renderIssuance(){ let t=""; issuance.forEach(i=>{ t+=`<tr><td>${i.property}</td><td>${i.ics}</td><td>${i.par}</td><td>${i.to}</td></tr>`; }); document.querySelector("#issuanceTable tbody").innerHTML=t; renderInventory(); }
+    function renderTransfers(){ let t=""; transfers.forEach(i=>{ t+=`<tr><td>${i.property}</td><td>${i.from}</td><td>${i.to}</td></tr>`; }); document.querySelector("#transferTable tbody").innerHTML=t; renderInventory(); }
     function renderRepairs(){ let t=""; repairs.forEach(i=>{ t+=`<tr><td>${i.property}</td><td>${i.issue}</td><td>${i.cost}</td></tr>`; }); document.querySelector("#repairTable tbody").innerHTML=t; }
-    function renderDisposals(){ let t=""; disposals.forEach(i=>{ t+=`<tr><td>${i.property}</td><td>${i.method}</td></tr>`; }); document.querySelector("#disposalTable tbody").innerHTML=t; }
+    function renderDisposals(){ let t=""; disposals.forEach(i=>{ t+=`<tr><td>${i.property}</td><td>${i.method}</td></tr>`; }); document.querySelector("#disposalTable tbody").innerHTML=t; renderInventory(); }
 
     // ===== FORM SUBMISSIONS =====
     document.getElementById("inventoryForm").addEventListener("submit", function(e){
@@ -204,11 +207,11 @@
     });
 
     document.getElementById("issuanceForm").addEventListener("submit",function(e){
-        e.preventDefault(); issuance.push({ property:issueProperty.value, ics:ics.value, par:par.value, to:issuedTo.value }); localStorage.setItem("issuance",JSON.stringify(issuance)); renderIssuance(); renderInventory(); this.reset();
+        e.preventDefault(); issuance.push({ property:issueProperty.value, ics:ics.value, par:par.value, to:issuedTo.value }); localStorage.setItem("issuance",JSON.stringify(issuance)); renderIssuance(); this.reset();
     });
 
     document.getElementById("transferForm").addEventListener("submit",function(e){
-        e.preventDefault(); transfers.push({ property:transferProperty.value, from:fromOffice.value, to:toOffice.value }); localStorage.setItem("transfers",JSON.stringify(transfers)); renderTransfers(); renderInventory(); this.reset();
+        e.preventDefault(); transfers.push({ property:transferProperty.value, from:fromOffice.value, to:toOffice.value }); localStorage.setItem("transfers",JSON.stringify(transfers)); renderTransfers(); this.reset();
     });
 
     document.getElementById("repairForm").addEventListener("submit",function(e){
@@ -216,7 +219,7 @@
     });
 
     document.getElementById("disposalForm").addEventListener("submit",function(e){
-        e.preventDefault(); disposals.push({ property:disposeProperty.value, method:method.value }); localStorage.setItem("disposals",JSON.stringify(disposals)); renderDisposals(); renderInventory(); this.reset();
+        e.preventDefault(); disposals.push({ property:disposeProperty.value, method:method.value }); localStorage.setItem("disposals",JSON.stringify(disposals)); renderDisposals(); this.reset();
     });
 
     // ===== EXPORT FUNCTIONS =====
