@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PIMIS - Property Inventory Management System</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<h1>Property Inventory Management Information System</h1>
+<div id="login" class="container">
+    <h2>Sign In</h2>
+    <form id="loginForm">
+        <input type="text" id="username" placeholder="Username" required>
+        <input type="password" id="password" placeholder="Password" required>
+        <button type="submit">Sign In</button>
+    </form>
+    <p id="loginError"></p>
+</div>
+<div id="mainContent" style="display:none;">
+<div class="menu">
+    <button onclick="showSection('inventory')">Inventory</button>
+    <button onclick="showSection('issuance')">ICS/PAR</button>
+    <button onclick="showSection('transfer')">Transfer</button>
+    <button onclick="showSection('repair')">Repair</button>
+    <button onclick="showSection('disposal')">Disposal</button>
+    <button onclick="showSection('reports')">Reports</button>
+    <button onclick="logout()">Logout</button>
+</div>
+<div id="inventory" class="container">
+<h2>Inventory Management</h2>
+<form id="inventoryForm">
+    <input type="text" id="propertyNo" placeholder="Property No" required>
+    <input type="text" id="itemName" placeholder="Item Name" required>
+    <input type="number" id="qty" placeholder="Quantity" required>
+    <input type="number" id="value" placeholder="Unit Value" required>
+    <input type="text" id="officer" placeholder="Officer">
+    <input type="text" id="itemLocation" placeholder="Location">
+    <select id="condition">
+        <option>Serviceable</option>
+        <option>Unserviceable</option>
+    </select>
+    <button type="submit">Add Item</button>
+</form>
+<table>
+<thead>
+<tr>
+<th>Property</th>
+<th>Item</th>
+<th>Qty</th>
+<th>Value</th>
+<th>Officer</th>
+<th>Location</th>
+<th>Condition</th>
+<th>Action</th>
+</tr>
+</thead>
+<tbody id="inventoryTable"></tbody>
+</table>
+</div>
+<div id="issuance" class="container" style="display:none;">
+<h2>ICS / PAR Issuance</h2>
+<form id="issuanceForm">
+<input type="text" id="issueProperty" placeholder="Property No">
+<input type="text" id="ics" placeholder="ICS No">
+<input type="text" id="par" placeholder="PAR No">
+<input type="text" id="issuedTo" placeholder="Issued To">
+<button type="submit">Issue</button>
+</form>
+<table>
+<thead>
+<tr><th>Property</th><th>ICS</th><th>PAR</th><th>Issued To</th></tr>
+</thead>
+<tbody id="issuanceTable"></tbody>
+</table>
+</div>
+<div id="transfer" class="container" style="display:none;">
+<h2>Transfer Property</h2>
+<form id="transferForm">
+<input type="text" id="transferProperty" placeholder="Property No">
+<input type="text" id="fromOffice" placeholder="From Office">
+<input type="text" id="toOffice" placeholder="To Office">
+<button type="submit">Transfer</button>
+</form>
+<table>
+<thead>
+<tr><th>Property</th><th>From</th><th>To</th></tr>
+</thead>
+<tbody id="transferTable"></tbody>
+</table>
+</div>
+<div id="repair" class="container" style="display:none;">
+<h2>Repair & Maintenance</h2>
+<form id="repairForm">
+<input type="text" id="repairProperty" placeholder="Property No">
+<input type="text" id="issue" placeholder="Problem">
+<input type="number" id="cost" placeholder="Cost">
+<button type="submit">Record Repair</button>
+</form>
+<table>
+<thead>
+<tr><th>Property</th><th>Issue</th><th>Cost</th></tr>
+</thead>
+<tbody id="repairTable"></tbody>
+</table>
+</div>
+<div id="disposal" class="container" style="display:none;">
+<h2>Disposal</h2>
+<form id="disposalForm">
+<input type="text" id="disposeProperty" placeholder="Property No">
+<input type="text" id="method" placeholder="Disposal Method">
+<button type="submit">Dispose</button>
+</form>
+<table>
+<thead>
+<tr><th>Property</th><th>Method</th></tr>
+</thead>
+<tbody id="disposalTable"></tbody>
+</table>
+</div>
+<div id="reports" class="container" style="display:none;">
+<h2>Reports</h2>
+<button onclick="exportInventory()">Export Full Report</button>
+</div>
+</div>
+<script src="script.js"></script>
+</body>
+</html>

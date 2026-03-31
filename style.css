@@ -1,0 +1,9 @@
+body { font-family: Arial; background:#f4f6f9; margin:20px; }
+h1,h2 { text-align:center; }
+.container { background:white; padding:15px; border-radius:10px; margin-bottom:20px; }
+input, select, button { padding:8px; margin:5px; }
+table { width:100%; border-collapse:collapse; margin-top:10px; }
+th, td { border:1px solid #ddd; padding:8px; text-align:center; }
+th { background:#007bff; color:white; }
+.menu button { margin:5px; }
+#loginError { color:red; text-align:center; }
