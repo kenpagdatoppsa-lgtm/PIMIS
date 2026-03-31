@@ -1,128 +1,267 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
+    <title>PIMIS v3 - Inventory with Remaining</title>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PIMIS - Property Inventory Management System</title>
-    <link rel="stylesheet" href="style.css">
+    <!-- SheetJS for Excel -->
+    <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+    <!-- jsPDF and autoTable for PDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+    <style>
+        body { font-family: Arial; margin: 20px; background: #f4f6f9; }
+        h1, h2 { text-align: center; }
+        .container { display: none; margin-top: 20px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
+        th { background: #007bff; color: white; }
+        button { margin: 5px; padding: 6px 12px; cursor: pointer; }
+        input, select { padding: 5px; margin: 2px; }
+        #login { max-width: 300px; margin: auto; background: white; padding: 20px; border-radius: 8px; text-align: center; }
+    </style>
 </head>
 <body>
-<h1>Property Inventory Management Information System</h1>
-<div id="login" class="container">
-    <h2>Sign In</h2>
+
+<!-- LOGIN -->
+<div id="login">
+    <h2>PIMIS Login</h2>
     <form id="loginForm">
-        <input type="text" id="username" placeholder="Username" required>
-        <input type="password" id="password" placeholder="Password" required>
-        <button type="submit">Sign In</button>
+        <input type="text" id="username" placeholder="Username" required><br>
+        <input type="password" id="password" placeholder="Password" required><br>
+        <button type="submit">Login</button>
     </form>
-    <p id="loginError"></p>
+    <p id="loginError" style="color:red;"></p>
 </div>
+
+<!-- MAIN CONTENT -->
 <div id="mainContent" style="display:none;">
-<div class="menu">
-    <button onclick="showSection('inventory')">Inventory</button>
-    <button onclick="showSection('issuance')">ICS/PAR</button>
-    <button onclick="showSection('transfer')">Transfer</button>
-    <button onclick="showSection('repair')">Repair</button>
-    <button onclick="showSection('disposal')">Disposal</button>
-    <button onclick="showSection('reports')">Reports</button>
+    <h1>PIMIS Property Inventory Management</h1>
     <button onclick="logout()">Logout</button>
+    <button onclick="exportFullExcel()">Export Excel</button>
+    <button onclick="exportFullPDF()">Export PDF</button>
+
+    <!-- NAVIGATION -->
+    <div style="text-align:center; margin-top:10px;">
+        <button onclick="showSection('inventory')">Inventory</button>
+        <button onclick="showSection('issuance')">Issuance</button>
+        <button onclick="showSection('transfers')">Transfers</button>
+        <button onclick="showSection('repairs')">Repairs</button>
+        <button onclick="showSection('disposals')">Disposals</button>
+    </div>
+
+    <!-- SECTIONS -->
+    <div id="inventory" class="container">
+        <h2>Inventory</h2>
+        <form id="inventoryForm">
+            <input placeholder="Property No" id="propertyNo" required>
+            <input placeholder="Item Name" id="itemName" required>
+            <input placeholder="Quantity" id="qty" type="number" required>
+            <input placeholder="Value" id="value" type="number" required>
+            <input placeholder="Officer" id="officer" required>
+            <input placeholder="Location" id="itemLocation" required>
+            <input placeholder="Condition" id="condition" required>
+            <button type="submit">Add Item</button>
+        </form>
+        <table id="inventoryTable">
+            <thead>
+                <tr>
+                    <th>Property</th><th>Item</th><th>Qty</th><th>Remaining</th><th>Value</th><th>Officer</th><th>Location</th><th>Condition</th><th>Action</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+
+    <div id="issuance" class="container">
+        <h2>Issuance</h2>
+        <form id="issuanceForm">
+            <input placeholder="Property" id="issueProperty" required>
+            <input placeholder="ICS" id="ics" required>
+            <input placeholder="PAR" id="par" required>
+            <input placeholder="Issued To" id="issuedTo" required>
+            <button type="submit">Add Issuance</button>
+        </form>
+        <table id="issuanceTable">
+            <thead><tr><th>Property</th><th>ICS</th><th>PAR</th><th>Issued To</th></tr></thead>
+            <tbody></tbody>
+        </table>
+    </div>
+
+    <div id="transfers" class="container">
+        <h2>Transfers</h2>
+        <form id="transferForm">
+            <input placeholder="Property" id="transferProperty" required>
+            <input placeholder="From" id="fromOffice" required>
+            <input placeholder="To" id="toOffice" required>
+            <button type="submit">Add Transfer</button>
+        </form>
+        <table id="transferTable">
+            <thead><tr><th>Property</th><th>From</th><th>To</th></tr></thead>
+            <tbody></tbody>
+        </table>
+    </div>
+
+    <div id="repairs" class="container">
+        <h2>Repairs</h2>
+        <form id="repairForm">
+            <input placeholder="Property" id="repairProperty" required>
+            <input placeholder="Issue" id="issue" required>
+            <input placeholder="Cost" id="cost" type="number" required>
+            <button type="submit">Add Repair</button>
+        </form>
+        <table id="repairTable">
+            <thead><tr><th>Property</th><th>Issue</th><th>Cost</th></tr></thead>
+            <tbody></tbody>
+        </table>
+    </div>
+
+    <div id="disposals" class="container">
+        <h2>Disposals</h2>
+        <form id="disposalForm">
+            <input placeholder="Property" id="disposeProperty" required>
+            <input placeholder="Method" id="method" required>
+            <button type="submit">Add Disposal</button>
+        </form>
+        <table id="disposalTable">
+            <thead><tr><th>Property</th><th>Method</th></tr></thead>
+            <tbody></tbody>
+        </table>
+    </div>
 </div>
-<div id="inventory" class="container">
-<h2>Inventory Management</h2>
-<form id="inventoryForm">
-    <input type="text" id="propertyNo" placeholder="Property No" required>
-    <input type="text" id="itemName" placeholder="Item Name" required>
-    <input type="number" id="qty" placeholder="Quantity" required>
-    <input type="number" id="value" placeholder="Unit Value" required>
-    <input type="text" id="officer" placeholder="Officer">
-    <input type="text" id="itemLocation" placeholder="Location">
-    <select id="condition">
-        <option>Serviceable</option>
-        <option>Unserviceable</option>
-    </select>
-    <button type="submit">Add Item</button>
-</form>
-<table>
-<thead>
-<tr>
-<th>Property</th>
-<th>Item</th>
-<th>Qty</th>
-<th>Value</th>
-<th>Officer</th>
-<th>Location</th>
-<th>Condition</th>
-<th>Action</th>
-</tr>
-</thead>
-<tbody id="inventoryTable"></tbody>
-</table>
-</div>
-<div id="issuance" class="container" style="display:none;">
-<h2>ICS / PAR Issuance</h2>
-<form id="issuanceForm">
-<input type="text" id="issueProperty" placeholder="Property No">
-<input type="text" id="ics" placeholder="ICS No">
-<input type="text" id="par" placeholder="PAR No">
-<input type="text" id="issuedTo" placeholder="Issued To">
-<button type="submit">Issue</button>
-</form>
-<table>
-<thead>
-<tr><th>Property</th><th>ICS</th><th>PAR</th><th>Issued To</th></tr>
-</thead>
-<tbody id="issuanceTable"></tbody>
-</table>
-</div>
-<div id="transfer" class="container" style="display:none;">
-<h2>Transfer Property</h2>
-<form id="transferForm">
-<input type="text" id="transferProperty" placeholder="Property No">
-<input type="text" id="fromOffice" placeholder="From Office">
-<input type="text" id="toOffice" placeholder="To Office">
-<button type="submit">Transfer</button>
-</form>
-<table>
-<thead>
-<tr><th>Property</th><th>From</th><th>To</th></tr>
-</thead>
-<tbody id="transferTable"></tbody>
-</table>
-</div>
-<div id="repair" class="container" style="display:none;">
-<h2>Repair & Maintenance</h2>
-<form id="repairForm">
-<input type="text" id="repairProperty" placeholder="Property No">
-<input type="text" id="issue" placeholder="Problem">
-<input type="number" id="cost" placeholder="Cost">
-<button type="submit">Record Repair</button>
-</form>
-<table>
-<thead>
-<tr><th>Property</th><th>Issue</th><th>Cost</th></tr>
-</thead>
-<tbody id="repairTable"></tbody>
-</table>
-</div>
-<div id="disposal" class="container" style="display:none;">
-<h2>Disposal</h2>
-<form id="disposalForm">
-<input type="text" id="disposeProperty" placeholder="Property No">
-<input type="text" id="method" placeholder="Disposal Method">
-<button type="submit">Dispose</button>
-</form>
-<table>
-<thead>
-<tr><th>Property</th><th>Method</th></tr>
-</thead>
-<tbody id="disposalTable"></tbody>
-</table>
-</div>
-<div id="reports" class="container" style="display:none;">
-<h2>Reports</h2>
-<button onclick="exportInventory()">Export Full Report</button>
-</div>
-</div>
-<script src="script.js"></script>
+
+<script>
+    // ===== LOGIN SYSTEM =====
+    const users = [{username:"Admin",password:"Admin123!"},{username:"Officer",password:"Officer123!"}];
+    const loginForm=document.getElementById("loginForm");
+    const loginError=document.getElementById("loginError");
+    const loginDiv=document.getElementById("login");
+    const mainContent=document.getElementById("mainContent");
+
+    loginForm.addEventListener("submit",function(e){
+        e.preventDefault();
+        const username=document.getElementById("username").value;
+        const password=document.getElementById("password").value;
+        const user=users.find(u=>u.username===username && u.password===password);
+        if(user){ loginDiv.style.display="none"; mainContent.style.display="block"; showSection('inventory'); localStorage.setItem("loggedIn","true"); }
+        else { loginError.textContent="Invalid username or password!"; }
+    });
+
+    if(localStorage.getItem("loggedIn")==="true"){ loginDiv.style.display="none"; mainContent.style.display="block"; showSection('inventory'); }
+
+    function logout(){ localStorage.removeItem("loggedIn"); location.reload(); }
+    function showSection(section){ document.querySelectorAll('.container').forEach(div=>div.style.display='none'); document.getElementById(section).style.display='block'; }
+
+    // ===== LOCAL STORAGE DATA =====
+    let inventory=JSON.parse(localStorage.getItem('inventory'))||[];
+    let issuance=JSON.parse(localStorage.getItem('issuance'))||[];
+    let transfers=JSON.parse(localStorage.getItem('transfers'))||[];
+    let repairs=JSON.parse(localStorage.getItem('repairs'))||[];
+    let disposals=JSON.parse(localStorage.getItem('disposals'))||[];
+
+    // ===== REMAINING INVENTORY =====
+    function updateRemainingInventory() {
+        inventory.forEach(item => {
+            const issuedCount = issuance.filter(i=>i.property===item.property).length;
+            const transferredCount = transfers.filter(t=>t.property===item.property).length;
+            const disposedCount = disposals.filter(d=>d.property===item.property).length;
+            item.remaining = item.qty - issuedCount - transferredCount - disposedCount;
+            if(item.remaining < 0) item.remaining = 0;
+        });
+    }
+
+    // ===== RENDER FUNCTIONS =====
+    function renderInventory(){
+        updateRemainingInventory();
+        let table = "";
+        inventory.forEach((i,index)=>{
+            table += `<tr>
+                <td>${i.property}</td>
+                <td>${i.item}</td>
+                <td>${i.qty}</td>
+                <td>${i.remaining}</td>
+                <td>${i.value}</td>
+                <td>${i.officer}</td>
+                <td>${i.location}</td>
+                <td>${i.condition}</td>
+                <td><button onclick="deleteItem(${index})">Delete</button></td>
+            </tr>`;
+        });
+        document.querySelector("#inventoryTable tbody").innerHTML = table;
+    }
+    function deleteItem(index){ inventory.splice(index,1); localStorage.setItem("inventory",JSON.stringify(inventory)); renderInventory(); }
+
+    function renderIssuance(){ let t=""; issuance.forEach(i=>{ t+=`<tr><td>${i.property}</td><td>${i.ics}</td><td>${i.par}</td><td>${i.to}</td></tr>`; }); document.querySelector("#issuanceTable tbody").innerHTML=t; }
+    function renderTransfers(){ let t=""; transfers.forEach(i=>{ t+=`<tr><td>${i.property}</td><td>${i.from}</td><td>${i.to}</td></tr>`; }); document.querySelector("#transferTable tbody").innerHTML=t; }
+    function renderRepairs(){ let t=""; repairs.forEach(i=>{ t+=`<tr><td>${i.property}</td><td>${i.issue}</td><td>${i.cost}</td></tr>`; }); document.querySelector("#repairTable tbody").innerHTML=t; }
+    function renderDisposals(){ let t=""; disposals.forEach(i=>{ t+=`<tr><td>${i.property}</td><td>${i.method}</td></tr>`; }); document.querySelector("#disposalTable tbody").innerHTML=t; }
+
+    // ===== FORM SUBMISSIONS =====
+    document.getElementById("inventoryForm").addEventListener("submit", function(e){
+        e.preventDefault();
+        const item={ property:propertyNo.value, item:itemName.value, qty:parseInt(qty.value), value:parseFloat(value.value), officer:officer.value, location:itemLocation.value, condition:condition.value };
+        inventory.push(item); localStorage.setItem("inventory",JSON.stringify(inventory)); renderInventory(); this.reset();
+    });
+
+    document.getElementById("issuanceForm").addEventListener("submit",function(e){
+        e.preventDefault(); issuance.push({ property:issueProperty.value, ics:ics.value, par:par.value, to:issuedTo.value }); localStorage.setItem("issuance",JSON.stringify(issuance)); renderIssuance(); renderInventory(); this.reset();
+    });
+
+    document.getElementById("transferForm").addEventListener("submit",function(e){
+        e.preventDefault(); transfers.push({ property:transferProperty.value, from:fromOffice.value, to:toOffice.value }); localStorage.setItem("transfers",JSON.stringify(transfers)); renderTransfers(); renderInventory(); this.reset();
+    });
+
+    document.getElementById("repairForm").addEventListener("submit",function(e){
+        e.preventDefault(); repairs.push({ property:repairProperty.value, issue:issue.value, cost:cost.value }); localStorage.setItem("repairs",JSON.stringify(repairs)); renderRepairs(); this.reset();
+    });
+
+    document.getElementById("disposalForm").addEventListener("submit",function(e){
+        e.preventDefault(); disposals.push({ property:disposeProperty.value, method:method.value }); localStorage.setItem("disposals",JSON.stringify(disposals)); renderDisposals(); renderInventory(); this.reset();
+    });
+
+    // ===== EXPORT FUNCTIONS =====
+    function exportFullExcel() {
+        const wb = XLSX.utils.book_new();
+        function addSheet(name,data){
+            const sheetData = data.length ? data : [{Note:"No data available"}];
+            const ws = XLSX.utils.json_to_sheet(sheetData);
+            XLSX.utils.book_append_sheet(wb, ws, name);
+        }
+        addSheet("Inventory", inventory);
+        addSheet("Issuance", issuance);
+        addSheet("Transfers", transfers);
+        addSheet("Repairs", repairs);
+        addSheet("Disposals", disposals);
+        XLSX.writeFile(wb, "PIMIS_Full_Report.xlsx");
+    }
+
+    function exportFullPDF(){
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
+        let startY=20;
+        doc.setFontSize(14); doc.text("PIMIS Full Report",10,startY); startY+=10;
+
+        function addTable(title,data){
+            doc.setFontSize(12); doc.text(title,10,startY); startY+=5;
+            if(data.length===0){ doc.text("No data available",10,startY); startY+=10; return; }
+            const headers=Object.keys(data[0]);
+            const rows=data.map(obj=>headers.map(h=>obj[h]));
+            doc.autoTable({ head:[headers], body:rows, startY:startY, margin:{left:10,right:10}, styles:{fontSize:10,cellPadding:2}, theme:'grid', headStyles:{fillColor:[0,123,255],textColor:255} });
+            startY=doc.lastAutoTable.finalY+10;
+        }
+
+        addTable("Inventory",inventory);
+        addTable("Issuance",issuance);
+        addTable("Transfers",transfers);
+        addTable("Repairs",repairs);
+        addTable("Disposals",disposals);
+
+        doc.save("PIMIS_Full_Report.pdf");
+    }
+
+    // ===== INITIAL RENDER =====
+    renderInventory(); renderIssuance(); renderTransfers(); renderRepairs(); renderDisposals();
+</script>
+
 </body>
 </html>
