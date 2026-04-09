@@ -1,330 +1,254 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>PIMIS v4 - Property Inventory Management System</title>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PIMIS v4 - Fixed</title>
+<meta charset="UTF-8">
 
-    <!-- Excel -->
-    <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
-    <!-- PDF -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
 
-    <style>
-        body { font-family: Arial; margin: 20px; background: #f4f6f9; }
-        h1, h2 { text-align: center; }
-        .container { display: none; margin-top: 20px; }
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; background:white; }
-        th, td { border: 1px solid #ccc; padding: 8px; }
-        th { background: #007bff; color: white; }
-        button { margin: 5px; padding: 6px 12px; cursor: pointer; }
-        input { padding: 5px; margin: 2px; }
-        #login { max-width: 300px; margin: auto; background: white; padding: 20px; border-radius: 8px; text-align: center; }
-        .card { background:white; padding:15px; border-radius:8px; width:200px; }
-    </style>
+<style>
+body {font-family:Arial; background:#f4f6f9; margin:20px;}
+.container{display:none;}
+table{width:100%; border-collapse:collapse; background:white;}
+th,td{border:1px solid #ccc; padding:8px;}
+th{background:#007bff;color:white;}
+.card{background:white;padding:15px;border-radius:8px;width:200px;}
+</style>
 </head>
+
 <body>
 
 <!-- LOGIN -->
 <div id="login">
-    <h2>PIMIS Login</h2>
-    <form id="loginForm">
-        <input type="text" id="username" placeholder="Username" required><br>
-        <input type="password" id="password" placeholder="Password" required><br>
-        <button type="submit">Login</button>
-    </form>
-    <p id="loginError" style="color:red;"></p>
+<h2>PIMIS Login</h2>
+<form id="loginForm">
+<input id="username" placeholder="Username" required><br>
+<input id="password" type="password" placeholder="Password" required><br>
+<button>Login</button>
+</form>
+<p id="loginError" style="color:red;"></p>
 </div>
 
 <!-- MAIN -->
 <div id="mainContent" style="display:none;">
-    <h1>PIMIS Property Inventory Management</h1>
+<h1>PIMIS System</h1>
 
-    <div style="text-align:center;">
-        <button onclick="logout()">Logout</button>
-        <button onclick="exportFullExcel()">Export Excel</button>
-        <button onclick="exportFullPDF()">Export PDF</button>
-        <button onclick="backupData()">Backup Data</button>
-        <input type="file" onchange="restoreData(event)">
-    </div>
+<button onclick="logout()">Logout</button>
+<button onclick="exportExcel()">Export Excel</button>
+<button onclick="exportPDF()">Export PDF</button>
 
-    <!-- NAV -->
-    <div style="text-align:center;">
-        <button onclick="showSection('dashboard')">Dashboard</button>
-        <button onclick="showSection('inventory')">Inventory</button>
-        <button onclick="showSection('issuance')">Issuance</button>
-        <button onclick="showSection('transfers')">Transfers</button>
-        <button onclick="showSection('repairs')">Repairs</button>
-        <button onclick="showSection('disposals')">Disposals</button>
-    </div>
+<div>
+<button onclick="show('dashboard')">Dashboard</button>
+<button onclick="show('inventory')">Inventory</button>
+</div>
 
-    <!-- DASHBOARD -->
-    <div id="dashboard" class="container">
-        <h2>Dashboard</h2>
-        <div style="display:flex; gap:20px; flex-wrap:wrap;">
-            <div class="card"><h3>Total Items</h3><p id="totalItems">0</p></div>
-            <div class="card"><h3>Total Quantity</h3><p id="totalQty">0</p></div>
-            <div class="card"><h3>Total Value</h3><p id="totalValue">0</p></div>
-            <div class="card"><h3>Total Issued</h3><p id="totalIssued">0</p></div>
-        </div>
-    </div>
+<!-- DASHBOARD -->
+<div id="dashboard" class="container">
+<h2>Dashboard</h2>
+<div style="display:flex;gap:10px;">
+<div class="card">Items: <span id="totalItems"></span></div>
+<div class="card">Qty: <span id="totalQty"></span></div>
+<div class="card">Value: <span id="totalValue"></span></div>
+</div>
+</div>
 
-    <!-- INVENTORY -->
-    <div id="inventory" class="container">
-        <h2>Inventory</h2>
+<!-- INVENTORY -->
+<div id="inventory" class="container">
+<h2>Inventory</h2>
 
-        <input type="text" id="searchInventory" placeholder="Search Property or Item" onkeyup="searchInventory()">
+<input id="search" placeholder="Search..." onkeyup="search()">
 
-        <form id="inventoryForm">
-            <input placeholder="Property No" id="propertyNo" required>
-            <input placeholder="Item Name" id="itemName" required>
-            <input placeholder="Quantity" id="qty" type="number" required>
-            <input placeholder="Unit Price" id="unitPrice" type="number" required>
-            <input placeholder="Officer" id="officer" required>
-            <input placeholder="Location" id="itemLocation" required>
-            <input placeholder="Condition" id="condition" required>
-            <button type="submit">Add Item</button>
-        </form>
+<form id="form">
+<input id="property" placeholder="Property" required>
+<input id="item" placeholder="Item" required>
+<input id="qty" type="number" placeholder="Qty" required>
+<input id="price" type="number" placeholder="Unit Price" required>
+<button>Add</button>
+</form>
 
-        <table id="inventoryTable">
-            <thead>
-                <tr>
-                    <th>Property</th>
-                    <th>Item</th>
-                    <th>Qty</th>
-                    <th>Remaining</th>
-                    <th>Unit Price</th>
-                    <th>Total Price</th>
-                    <th>Officer</th>
-                    <th>Location</th>
-                    <th>Condition</th>
-                    <th>Action</th>
-                </tr>
-            </thead>
-            <tbody></tbody>
-        </table>
-    </div>
+<table id="table">
+<thead>
+<tr>
+<th>Property</th><th>Item</th><th>Qty</th>
+<th>Unit Price</th><th>Total</th><th>Action</th>
+</tr>
+</thead>
+<tbody></tbody>
+</table>
+</div>
 
-    <!-- ISSUANCE -->
-    <div id="issuance" class="container">
-        <h2>Issuance</h2>
-        <form id="issuanceForm">
-            <input placeholder="Property" id="issueProperty" required>
-            <input placeholder="ICS" id="ics" required>
-            <input placeholder="PAR" id="par" required>
-            <input placeholder="Issued To" id="issuedTo" required>
-            <button type="submit">Add Issuance</button>
-        </form>
-        <table id="issuanceTable">
-            <thead><tr><th>Property</th><th>ICS</th><th>PAR</th><th>Issued To</th></tr></thead>
-            <tbody></tbody>
-        </table>
-    </div>
-
-    <!-- TRANSFERS -->
-    <div id="transfers" class="container">
-        <h2>Transfers</h2>
-        <form id="transferForm">
-            <input placeholder="Property" id="transferProperty" required>
-            <input placeholder="From" id="fromOffice" required>
-            <input placeholder="To" id="toOffice" required>
-            <button type="submit">Add Transfer</button>
-        </form>
-        <table id="transferTable">
-            <thead><tr><th>Property</th><th>From</th><th>To</th></tr></thead>
-            <tbody></tbody>
-        </table>
-    </div>
-
-    <!-- REPAIRS -->
-    <div id="repairs" class="container">
-        <h2>Repairs</h2>
-        <form id="repairForm">
-            <input placeholder="Property" id="repairProperty" required>
-            <input placeholder="Issue" id="issue" required>
-            <input placeholder="Cost" id="cost" type="number" required>
-            <button type="submit">Add Repair</button>
-        </form>
-        <table id="repairTable">
-            <thead><tr><th>Property</th><th>Issue</th><th>Cost</th></tr></thead>
-            <tbody></tbody>
-        </table>
-    </div>
-
-    <!-- DISPOSALS -->
-    <div id="disposals" class="container">
-        <h2>Disposals</h2>
-        <form id="disposalForm">
-            <input placeholder="Property" id="disposeProperty" required>
-            <input placeholder="Method" id="method" required>
-            <button type="submit">Add Disposal</button>
-        </form>
-        <table id="disposalTable">
-            <thead><tr><th>Property</th><th>Method</th></tr></thead>
-            <tbody></tbody>
-        </table>
-    </div>
 </div>
 
 <script>
+
+// ELEMENTS
+const loginForm = document.getElementById("loginForm");
+const loginDiv = document.getElementById("login");
+const main = document.getElementById("mainContent");
+const error = document.getElementById("loginError");
+
 // LOGIN
-const users=[{username:"Admin",password:"Admin123!"},{username:"Officer",password:"Officer123!"}];
-loginForm.addEventListener("submit",function(e){
-    e.preventDefault();
-    const u=username.value;
-    const p=password.value;
-    const user=users.find(x=>x.username===u && x.password===p);
-    if(user){ login.style.display="none"; mainContent.style.display="block"; showSection('dashboard'); localStorage.setItem("loggedIn","true"); }
-    else{ loginError.textContent="Invalid login"; }
-});
-if(localStorage.getItem("loggedIn")==="true"){ login.style.display="none"; mainContent.style.display="block"; showSection('dashboard'); }
-function logout(){ localStorage.removeItem("loggedIn"); location.reload(); }
-function showSection(section){ document.querySelectorAll('.container').forEach(div=>div.style.display='none'); document.getElementById(section).style.display='block'; updateDashboard(); }
+const users=[{u:"Admin",p:"Admin123!"}];
+
+loginForm.onsubmit = e=>{
+e.preventDefault();
+const u=username.value;
+const p=password.value;
+
+const found = users.find(x=>x.u===u && x.p===p);
+
+if(found){
+loginDiv.style.display="none";
+main.style.display="block";
+show('dashboard');
+localStorage.setItem("login",true);
+}else error.textContent="Wrong login";
+};
+
+if(localStorage.getItem("login")){
+loginDiv.style.display="none";
+main.style.display="block";
+show('dashboard');
+}
+
+function logout(){localStorage.clear(); location.reload();}
 
 // DATA
-let inventory=JSON.parse(localStorage.getItem('inventory'))||[];
-let issuance=JSON.parse(localStorage.getItem('issuance'))||[];
-let transfers=JSON.parse(localStorage.getItem('transfers'))||[];
-let repairs=JSON.parse(localStorage.getItem('repairs'))||[];
-let disposals=JSON.parse(localStorage.getItem('disposals'))||[];
+let data = JSON.parse(localStorage.getItem("data")) || [];
 
-// REMAINING
-function updateRemainingInventory(){
-    inventory.forEach(item=>{
-        const issued=issuance.filter(i=>i.property===item.property).length;
-        const transferred=transfers.filter(t=>t.property===item.property).length;
-        const disposed=disposals.filter(d=>d.property===item.property).length;
-        item.remaining=item.qty-issued-transferred-disposed;
-        if(item.remaining<0) item.remaining=0;
-    });
+// FORMAT PESO
+function peso(x){
+return "₱ " + Number(x).toLocaleString('en-PH',{minimumFractionDigits:2});
+}
+
+// SHOW PAGE
+function show(id){
+document.querySelectorAll(".container").forEach(x=>x.style.display="none");
+document.getElementById(id).style.display="block";
+updateDashboard();
+render();
+}
+
+// ADD ITEM
+form.onsubmit = e=>{
+e.preventDefault();
+
+const obj={
+property:property.value,
+item:item.value,
+qty:Number(qty.value),
+price:Number(price.value)
+};
+
+data.push(obj);
+save();
+render();
+form.reset();
+};
+
+// SAVE
+function save(){
+localStorage.setItem("data",JSON.stringify(data));
+}
+
+// RENDER
+function render(){
+let rows="";
+data.forEach((d,i)=>{
+rows+=`<tr>
+<td>${d.property}</td>
+<td>${d.item}</td>
+<td>${d.qty}</td>
+<td>${peso(d.price)}</td>
+<td>${peso(d.qty*d.price)}</td>
+<td><button onclick="del(${i})">Delete</button></td>
+</tr>`;
+});
+table.querySelector("tbody").innerHTML=rows;
+}
+
+// DELETE
+function del(i){
+data.splice(i,1);
+save();
+render();
+}
+
+// SEARCH
+function search(){
+const s=document.getElementById("search").value.toLowerCase();
+let rows="";
+data.forEach((d,i)=>{
+if(d.property.toLowerCase().includes(s)||d.item.toLowerCase().includes(s)){
+rows+=`<tr>
+<td>${d.property}</td>
+<td>${d.item}</td>
+<td>${d.qty}</td>
+<td>${peso(d.price)}</td>
+<td>${peso(d.qty*d.price)}</td>
+<td><button onclick="del(${i})">Delete</button></td>
+</tr>`;
+}
+});
+table.querySelector("tbody").innerHTML=rows;
 }
 
 // DASHBOARD
 function updateDashboard(){
-    let totalItems=inventory.length;
-    let totalQty=0;
-    let totalValue=0;
-    inventory.forEach(i=>{
-        totalQty+=i.qty;
-        totalValue+=i.totalPrice||0;
-    });
-    totalItems && (document.getElementById("totalItems").textContent=totalItems);
-    document.getElementById("totalQty").textContent=totalQty;
-    document.getElementById("totalValue").textContent=totalValue.toFixed(2);
-    document.getElementById("totalIssued").textContent=issuance.length;
+let qty=0,val=0;
+data.forEach(d=>{
+qty+=d.qty;
+val+=d.qty*d.price;
+});
+totalItems.textContent=data.length;
+totalQty.textContent=qty;
+totalValue.textContent=peso(val);
 }
 
-// RENDER
-function renderInventory(){
-    updateRemainingInventory();
-    let table="";
-    inventory.forEach((i,index)=>{
-        table+=`<tr>
-        <td>${i.property}</td>
-        <td>${i.item}</td>
-        <td>${i.qty}</td>
-        <td>${i.remaining}</td>
-        <td>${i.unitPrice}</td>
-        <td>${i.totalPrice}</td>
-        <td>${i.officer}</td>
-        <td>${i.location}</td>
-        <td>${i.condition}</td>
-        <td><button onclick="deleteItem(${index})">Delete</button></td>
-        </tr>`;
-    });
-    document.querySelector("#inventoryTable tbody").innerHTML=table;
+// EXCEL
+function exportExcel(){
+const ws = XLSX.utils.json_to_sheet(data.map(d=>({
+Property:d.property,
+Item:d.item,
+Qty:d.qty,
+UnitPrice:d.price,
+Total:d.qty*d.price
+})));
+
+ws['!cols']=[{wch:20},{wch:20},{wch:10},{wch:15},{wch:15}];
+
+const wb=XLSX.utils.book_new();
+XLSX.utils.book_append_sheet(wb,ws,"Inventory");
+XLSX.writeFile(wb,"PIMIS.xlsx");
 }
-function deleteItem(index){ inventory.splice(index,1); localStorage.setItem("inventory",JSON.stringify(inventory)); renderInventory(); }
 
-function renderIssuance(){ let t=""; issuance.forEach(i=>{ t+=`<tr><td>${i.property}</td><td>${i.ics}</td><td>${i.par}</td><td>${i.to}</td></tr>`; }); issuanceTable.querySelector("tbody").innerHTML=t; }
-function renderTransfers(){ let t=""; transfers.forEach(i=>{ t+=`<tr><td>${i.property}</td><td>${i.from}</td><td>${i.to}</td></tr>`; }); transferTable.querySelector("tbody").innerHTML=t; }
-function renderRepairs(){ let t=""; repairs.forEach(i=>{ t+=`<tr><td>${i.property}</td><td>${i.issue}</td><td>${i.cost}</td></tr>`; }); repairTable.querySelector("tbody").innerHTML=t; }
-function renderDisposals(){ let t=""; disposals.forEach(i=>{ t+=`<tr><td>${i.property}</td><td>${i.method}</td></tr>`; }); disposalTable.querySelector("tbody").innerHTML=t; }
+// PDF
+function exportPDF(){
+const { jsPDF } = window.jspdf;
+const doc=new jsPDF();
 
-// ADD INVENTORY
-inventoryForm.addEventListener("submit",function(e){
-    e.preventDefault();
-    const item={
-        property:propertyNo.value,
-        item:itemName.value,
-        qty:parseInt(qty.value),
-        unitPrice:parseFloat(unitPrice.value),
-        totalPrice:parseInt(qty.value)*parseFloat(unitPrice.value),
-        officer:officer.value,
-        location:itemLocation.value,
-        condition:condition.value
-    };
-    inventory.push(item);
-    localStorage.setItem("inventory",JSON.stringify(inventory));
-    renderInventory();
-    updateDashboard();
-    this.reset();
+const rows=data.map(d=>[
+d.property,
+d.item,
+d.qty,
+peso(d.price),
+peso(d.qty*d.price)
+]);
+
+doc.autoTable({
+head:[["Property","Item","Qty","Unit Price","Total"]],
+body:rows
 });
 
-// SEARCH
-function searchInventory(){
-    const search=searchInventory.value.toLowerCase();
+doc.save("PIMIS.pdf");
 }
 
-// BACKUP / RESTORE
-function backupData(){
-    const data={inventory,issuance,transfers,repairs,disposals};
-    const blob=new Blob([JSON.stringify(data)],{type:"application/json"});
-    const a=document.createElement("a");
-    a.href=URL.createObjectURL(blob);
-    a.download="PIMIS_Backup.json";
-    a.click();
-}
+// INIT
+render();
+updateDashboard();
 
-function restoreData(event){
-    const file=event.target.files[0];
-    const reader=new FileReader();
-    reader.onload=function(e){
-        const data=JSON.parse(e.target.result);
-        inventory=data.inventory||[];
-        issuance=data.issuance||[];
-        transfers=data.transfers||[];
-        repairs=data.repairs||[];
-        disposals=data.disposals||[];
-        localStorage.setItem("inventory",JSON.stringify(inventory));
-        localStorage.setItem("issuance",JSON.stringify(issuance));
-        localStorage.setItem("transfers",JSON.stringify(transfers));
-        localStorage.setItem("repairs",JSON.stringify(repairs));
-        localStorage.setItem("disposals",JSON.stringify(disposals));
-        renderInventory(); renderIssuance(); renderTransfers(); renderRepairs(); renderDisposals();
-        updateDashboard();
-    }
-    reader.readAsText(file);
-}
-
-// EXPORT EXCEL
-function exportFullExcel(){
-    const wb=XLSX.utils.book_new();
-    function sheet(name,data){
-        if(data.length===0) data=[{Note:"No data"}];
-        const ws=XLSX.utils.json_to_sheet(data);
-        ws['!cols']=Object.keys(data[0]).map(()=>({wch:20}));
-        XLSX.utils.book_append_sheet(wb,ws,name);
-    }
-    sheet("Inventory",inventory);
-    sheet("Issuance",issuance);
-    sheet("Transfers",transfers);
-    sheet("Repairs",repairs);
-    sheet("Disposals",disposals);
-    XLSX.writeFile(wb,"PIMIS_Report.xlsx");
-}
-
-// EXPORT PDF
-function exportFullPDF(){
-    const { jsPDF } = window.jspdf;
-    const doc=new jsPDF();
-    doc.text("PIMIS Report",10,10);
-    doc.save("PIMIS_Report.pdf");
-}
-
-// INITIAL RENDER
-renderInventory(); renderIssuance(); renderTransfers(); renderRepairs(); renderDisposals(); updateDashboard();
 </script>
 
 </body>
